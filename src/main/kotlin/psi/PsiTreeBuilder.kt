@@ -33,13 +33,24 @@ class PsiTreeBuilder(private val config: Config) {
 
         // Set token if leaf
         if (children.isEmpty()) {
+            val token = node.text
+                .replace("\\", "\\\\")
+                .replace("\b", "\\b")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("\"", "\\\"")
+                .replace("\t", "    ")
+            val splitToken = splitToSubtokens(node.text).joinToString("|")
+
             currentNode.setNormalizedToken(
-                if (numberLiterals.contains(node.elementType)) {
+                if (config.normalizeLiterals && numberLiterals.contains(node.elementType)) {
                     if (numberWhiteList.contains(node.text)) node.text else NUMBER_LITERAL
+                } else if (config.splitNames && splitToken.isNotEmpty()) {
+                    splitToken
+                } else if (config.normalizeTokens) {
+                    normalizeToken(node.text, EMPTY_TOKEN)
                 } else {
-                    val normalizedToken = normalizeToken(node.text, EMPTY_TOKEN)
-                    val splitToken = splitToSubtokens(node.text).joinToString("|")
-                    if (config.splitNames && splitToken.isNotEmpty()) splitToken else normalizedToken
+                    token
                 }
             )
         }
@@ -48,15 +59,24 @@ class PsiTreeBuilder(private val config: Config) {
     }
 
     private fun validatePsiElement(node: PsiElement): Boolean {
-        val isSkipType = node is PsiWhiteSpace || node is PsiImportList || node is PsiPackageStatement
-        val isJavaPrintableSymbol = skipElementTypes.any { node.elementType == it }
-        val isEmptyList = (node.children.isEmpty() || node.text == "()") && listTypes.any { it.isInstance(node) }
+        val isJavaPrintableSymbol = config.removePrintableSymbols && skipElementTypes.any { node.elementType == it }
+        val isEmptyList = config.removeEmptyLists && (node.children.isEmpty() || node.text == "()") && listTypes.any { it.isInstance(node) }
+        val isSkipWhiteSpace = config.removeWhiteSpaces && node is PsiWhiteSpace
+        val isSkipAsterisks = config.removeAsterisks && node.toString() == "PsiDocToken:DOC_COMMENT_LEADING_ASTERISKS"
         val isSkipKeyword = config.removeKeyword && node is PsiKeyword
         val isSkipOperator = config.compressOperators && ElementType.OPERATION_BIT_SET.contains(node.elementType)
         val isSkipComment = config.removeComments && node is PsiComment && node !is PsiDocComment
         val isSkipJavaDoc = config.removeJavaDoc && node is PsiDocComment
-        return !(isSkipType || isJavaPrintableSymbol || isEmptyList || isSkipKeyword || isSkipOperator ||
-                isSkipComment || isSkipJavaDoc)
+        return !(
+                    isJavaPrintableSymbol ||
+                    isEmptyList ||
+                    isSkipAsterisks ||
+                    isSkipWhiteSpace ||
+                    isSkipKeyword ||
+                    isSkipOperator ||
+                    isSkipComment ||
+                    isSkipJavaDoc
+                )
     }
 
     private fun getPrintableType(node: PsiElement): String? {

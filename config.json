@@ -1,13 +1,19 @@
 {
   "format": "json",
-  "problem": "method name prediction",
+  "problem": "code completion",
 
-  "resolveTypes": true,
+  "resolveTypes": false,
+  "normalizeLiterals": false,
+  "normalizeTokens": false,
   "compressOperators": false,
   "removeKeyword": false,
-  "removeComments": false,
-  "removeJavaDoc": true,
-  "compressTree": true,
+  "removeComments": true,
+  "removeJavaDoc": false,
+  "removeAsterisks": true,
+  "removeWhiteSpaces": true,
+  "removePrintableSymbols": false,
+  "removeEmptyLists": false,
+  "compressTree": false,
 
   "maxPathWidth": 4,
   "maxPathLength": 9,
@@ -15,7 +21,7 @@
   "maxPathsInTest": 200,
   "nodesToNumbers": true,
 
-  "filters": ["constructor"],
+  "filters": [],
 
   "printTrees": false
 }

@@ -11,12 +11,18 @@ import kotlinx.serialization.Serializable
     Parser parameters
      */
     val resolveTypes: Boolean = true,
-    val splitNames: Boolean = true,
-    val batchSize: Int = 10_000,
+    val normalizeTokens: Boolean = true,
+    val normalizeLiterals: Boolean = true,
+    val splitNames: Boolean = false,
+    val batchSize: Int = 1000,
     val removeKeyword: Boolean = false,
     val compressOperators: Boolean = false,
+    val removeWhiteSpaces: Boolean = true,
     val removeComments: Boolean = true,
     val removeJavaDoc: Boolean = true,
+    val removeAsterisks: Boolean = true,
+    val removePrintableSymbols: Boolean = true,
+    val removeEmptyLists: Boolean = true,
     val compressTree: Boolean = false,
 
     /*
