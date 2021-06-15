@@ -1,4 +1,4 @@
-package mock_data.train.mock_project
+package mock_data.train.mock_project;
 
 import java.util.Map;
 
